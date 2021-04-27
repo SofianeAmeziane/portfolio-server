@@ -14,14 +14,33 @@ exports.getportfolioById = async (req,res) => {
       }
 exports.createportfolio = async (req,res)=> {
   const portfolioData = req.body;
-  // Todo: Exctract from req!
-  const userId = 'google-oauth2|117397001987963006436';
+  const userId = req.user.sub;
   const portfolio = new Portfolio(portfolioData);
   portfolio.userId = userId;
 
   try {
     const newPortfolio = await portfolio.save();
     return res.json(newPortfolio);
+  } catch(error) {
+    return res.status(422).send(error.message);
+  }
+}
+
+exports.updateportfolio = async (req,res) => {
+  const {body,params: {id}} = req;
+  try {
+    const updatedportfolio = await Portfolio.findByIdAndUpdate({_id : id},body,{new:true, runValidators:true})
+    return res.json(updatedportfolio);
+  } catch(error) { 
+    return res.status(422).send(error.message);
+  }
+}
+
+exports.deleteportfolio = async (req,res) => {
+  const {params: {id}} = req;
+  try {
+    const deletedportfolio = await Portfolio.findOneAndRemove({_id : id})
+    return res.json(deletedportfolio);
   } catch(error) {
     return res.status(422).send(error.message);
   }
